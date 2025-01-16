@@ -17,7 +17,7 @@ public class DockerGui : IGui
             new DockPanelData("Left Dock", true),
             new DockPanelData("Top Dock", false),
             new DockPanelData("Right Dock", true),
-            new DockPanelData("Bottom Dock", true),
+            new DockPanelData("Bottom Dock", false),
             hasFileMenu: true);
     }
     public void Initialize()

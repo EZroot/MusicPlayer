@@ -22,7 +22,7 @@ public class MusicPlayerGui : IGui
 
     public void RenderGui()
     {
-        if (ImGui.Begin("Bottom Dock"))
+        if (ImGui.Begin("Left Dock"))
         {
             BuildConsole();
             ImGui.End();
@@ -37,18 +37,27 @@ public class MusicPlayerGui : IGui
         
         ImGui.BeginChild("##MusicList", new Vector2(childWidth, childHeight), ImGuiChildFlags.Borders);
         {
-            ImGui.Text($"Directory");
-            ImGui.Separator();
-            var files = Directory.GetFiles(AppHelper.SOUND_FOLDER);
-            foreach (var file in files)
+            if (ImGui.InputText("Directory", ref m_currentDirectory, 1024, ImGuiInputTextFlags.EnterReturnsTrue))
             {
-                if (ImGui.Button("Queue"))
+                
+            }
+            
+            ImGui.Separator();
+            if (Directory.Exists(m_currentDirectory))
+            {
+                var files = Directory.GetFiles(m_currentDirectory);
+                foreach (var file in files)
                 {
-                    
+                    var filePath = file.Replace(AppHelper.SOUND_FOLDER, "");
+                    if (ImGui.Button("Queue"))
+                    {
+                        //queue audio
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.Text(filePath);
+                    ImGui.Separator();
                 }
-                ImGui.SameLine();
-                ImGui.Text(file);
-                ImGui.Separator();
             }
         }
         ImGui.EndChild();
