@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Gui\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="SDL2-CS">
       <HintPath>..\SDL2Engine\lib\SDL2-CS.dll</HintPath>
     </Reference>
