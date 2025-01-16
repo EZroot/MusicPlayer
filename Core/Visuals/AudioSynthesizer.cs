@@ -1,3 +1,4 @@
+using MusicPlayer.Core.Events;
 using SDL2;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Events;
@@ -15,6 +16,7 @@ public class AudioSynthesizer
     private float[] m_previousHeights;
     private float m_smoothingFactor; // Smoothing factor between 0.1 and 0.3
     
+    private int m_dockWindowWidth, m_dockWindowHeight;
     private int m_windowWidth, m_windowHeight;
     private IAudioService m_audioService;
     
@@ -42,10 +44,13 @@ public class AudioSynthesizer
     public void Render(nint renderer, float minHue = 0.7f, float maxHue = 0.85f)
     {
         var frequencyBands = m_audioService.FrequencyBands;
+        var freqCount = frequencyBands.Count == 0 ? 1 : frequencyBands.Count;
+        m_rectWidth = (int)((m_dockWindowWidth / freqCount) - freqCount * 0.1f);
+        m_maxRectHeight = (int)(m_dockWindowHeight * 0.9f);
+        
         var bandRectSize = (m_rectWidth + m_rectSpacing) * frequencyBands.Count;
         var initialRectStartY = m_windowHeight / 2;
-        var initialRectStartX = m_windowWidth / 2 - bandRectSize / 2;//400;
-        // initialRectStartX -= m_windowWidth - bandRectSize / 2;
+        var initialRectStartX = m_windowWidth - m_dockWindowWidth / 2 - bandRectSize / 2;
 
         foreach (var bandPair in m_audioService.FrequencyBands)
         {
@@ -100,6 +105,13 @@ public class AudioSynthesizer
     private void SubscribeToEvents()
     {
         EventHub.Subscribe<OnWindowResized>(OnWindowResized);
+        EventHub.Subscribe<OnMainDockResized>(OnMainDockResized);
+    }
+
+    private void OnMainDockResized(object? sender, OnMainDockResized e)
+    {
+        m_dockWindowWidth = e.WindowWidth;
+        m_dockWindowHeight = e.WindowHeight;
     }
 
     private void OnWindowResized(object? sender, OnWindowResized e)

@@ -39,7 +39,7 @@ public class AudioPlayer
         try
         {
             SDL_mixer.Mix_HaltMusic();
-            SDL_mixer.Mix_FreeMusic(m_soundPtr);
+            // SDL_mixer.Mix_FreeMusic(m_soundPtr);
 
         }
         catch (Exception e)
