@@ -31,6 +31,10 @@ public class MusicApp : IGame
     private IGui m_musicPlayerGui;
 
     private bool m_debugConsole = true;
+    
+    private float minHue, maxHue;
+    private float maxHueSeperation = 0.24f;
+    private float hueTransitionSpeed = 0.001f;
 
     public void Initialize(IServiceProvider serviceProvider)
     {
@@ -57,10 +61,6 @@ public class MusicApp : IGame
         // m_audioService.PlaySound(soundId, AppHelper.GLOBAL_VOLUME);
         
         EventHub.Subscribe<OnMusicFinishedPlaying>(OnMusicFinishedPlaying);
-        //todo: yt-dlp downloader if its unavailable
-        //browse and download vids
-        //file explorerr gui window to filter music
-        //buttons to play or queue music
     }
 
     private void OnMusicFinishedPlaying(object? sender, OnMusicFinishedPlaying e)
@@ -85,11 +85,17 @@ public class MusicApp : IGame
 
     public void Update(float deltaTime)
     {
+        minHue += Time.DeltaTime * hueTransitionSpeed;
+        maxHue += Time.DeltaTime * hueTransitionSpeed;
+        if (minHue >= 1.0f) minHue -= 1.0f;
+        if (maxHue >= 1.0f) maxHue -= 1.0f;
+        if (maxHue > minHue + maxHueSeperation) maxHue = minHue + maxHueSeperation;
+        if (minHue > maxHue - maxHueSeperation) minHue = maxHue - maxHueSeperation;
     }
 
     public void Render()
     {
-        m_audioSynth.Render(m_renderService.RenderPtr);
+        m_audioSynth.Render(m_renderService.RenderPtr, minHue, maxHue);
     }
 
     public void RenderGui()

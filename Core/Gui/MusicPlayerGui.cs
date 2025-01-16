@@ -42,7 +42,7 @@ public class MusicPlayerGui : IGui
     {
         if (ImGui.Begin("Left Dock"))
         {
-            BuildConsole();
+            BuildDirectory();
             ImGui.End();
         }
 
@@ -56,16 +56,16 @@ public class MusicPlayerGui : IGui
 
     private bool m_isSongPaused = false;
 
-    private void BuildConsole()
+    private void BuildDirectory()
     {
         Vector2 availableSize = ImGui.GetContentRegionAvail();
         float childWidth = (availableSize.X) - ImGui.GetStyle().ItemSpacing.X;
         float childHeight = availableSize.Y;
         var currentSong = m_audioQueue.IsSongPlaying ? m_audioQueue.CurrentSong : "";
         var songStatus = m_audioQueue.IsSongPlaying ? m_audioQueue.IsSongPlaying && m_isSongPaused ? "Paused:" : "Playing:" : "No song playing";
-        ImGui.SeparatorText($"{songStatus} {currentSong} - Vol ({AppHelper.GLOBAL_VOLUME}/128)");
+        ImGui.SeparatorText($"Vol ({AppHelper.GLOBAL_VOLUME}/128) | {songStatus} {currentSong}");
+        ImGui.Text("Volume:");
         ImGui.SameLine();
-
         if (ImGui.SmallButton("+"))
         {
             var prev = AppHelper.GLOBAL_VOLUME;
