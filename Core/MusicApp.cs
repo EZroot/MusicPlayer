@@ -56,14 +56,14 @@ public class MusicApp : IGame
         // var soundId = m_audioService.LoadSound(AppHelper.SOUND_FOLDER + "/skidrow.wav");
         // m_audioService.PlaySound(soundId, AppHelper.GLOBAL_VOLUME);
         
-        EventHub.Subscribe<OnAudioProcessFinished>(OnAudioProcessFinished);
+        EventHub.Subscribe<OnMusicFinishedPlaying>(OnMusicFinishedPlaying);
         //todo: yt-dlp downloader if its unavailable
         //browse and download vids
         //file explorerr gui window to filter music
         //buttons to play or queue music
     }
 
-    private void OnAudioProcessFinished(object? sender, OnAudioProcessFinished e)
+    private void OnMusicFinishedPlaying(object? sender, OnMusicFinishedPlaying e)
     {
         if (m_audioQueue.QueuedAudio.Count == 0)
         {
@@ -77,9 +77,9 @@ public class MusicApp : IGame
             m_audioQueue.IsSongPlaying = true;
             m_audioQueue.CurrentSong = filePath.Replace(AppHelper.SOUND_FOLDER, "");
             
-            // m_audioService.UnregisterEffects(0);
-            m_audioPlayer.LoadAudio(filePath);
-            m_audioPlayer.PlayAudio();
+            m_audioPlayer.StopAudio();
+            m_audioPlayer.LoadAudio(filePath, AudioType.Music);
+            m_audioPlayer.PlayAudio(AppHelper.GLOBAL_VOLUME);
         }
     }
 

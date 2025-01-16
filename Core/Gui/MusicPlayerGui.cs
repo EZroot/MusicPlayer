@@ -48,7 +48,7 @@ public class MusicPlayerGui : IGui
         {
             if (ImGui.Button("Stop"))
             {
-                m_audioPlayer.FreeAudio();
+                m_audioPlayer.StopAudio();
             }
         }
 
@@ -81,13 +81,9 @@ public class MusicPlayerGui : IGui
                                 {
                                     m_audioQueue.IsSongPlaying = true;
                                     m_audioQueue.CurrentSong = filePath;
-                                    //need a way to tell when audio is already playing
-                                    // m_audioService.UnregisterEffects(0);
-                                    
-                                    m_audioPlayer.LoadAudio(file);
-                                    m_audioPlayer.PlayAudio();
-                                    // var soundId = m_audioService.LoadSound(file, AudioType.Wave);
-                                    // m_audioService.PlaySound(soundId, AppHelper.GLOBAL_VOLUME);
+                                    m_audioPlayer.StopAudio();
+                                    m_audioPlayer.LoadAudio(file, AudioType.Music);
+                                    m_audioPlayer.PlayAudio(AppHelper.GLOBAL_VOLUME);
                                 }
                             }
                             else

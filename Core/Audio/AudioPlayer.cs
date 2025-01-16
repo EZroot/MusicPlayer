@@ -8,26 +8,29 @@ namespace MusicPlayer.Core.Audio;
 public class AudioPlayer
 {
     private IAudioService m_audioService;
-    private IntPtr m_soundPtr;  // Changed to IntPtr to match typical usage
-    private int m_channel;
+    private nint m_soundPtr;  
+    private nint m_channel;
 
     public AudioPlayer(IAudioService audioService)
     {
         m_audioService = audioService;
-        m_soundPtr = IntPtr.Zero;  // Ensure pointer is initialized to zero
+        m_soundPtr = IntPtr.Zero;  
     }
 
-    public void LoadAudio(string filePath)
+    public void LoadAudio(string filePath, AudioType audioType)
     {
-        //FreeAudio();  // Ensure any previously loaded audio is freed
-        m_soundPtr = m_audioService.LoadSound(filePath);
+        m_soundPtr = SDL_mixer.Mix_LoadMUS(filePath);
     }
     
-    public void PlayAudio()
+    public void PlayAudio(int volume)
     {
         if (m_soundPtr != IntPtr.Zero)
         {
-            m_channel = m_audioService.PlaySound((int)m_soundPtr, AppHelper.GLOBAL_VOLUME);
+            m_audioService.PlayMusic(m_soundPtr, volume);
+        }
+        else
+        {
+            Debug.LogError("No sound available in memory ptr!");
         }
     }
 
@@ -35,21 +38,13 @@ public class AudioPlayer
     {
         try
         {
-            SDL_mixer.Mix_HaltChannel(m_channel); // Stop the specific channel playing the sound
+            SDL_mixer.Mix_HaltMusic();
+            SDL_mixer.Mix_FreeMusic(m_soundPtr);
+
         }
         catch (Exception e)
         {
             Debug.LogError(e.Message);
-        }
-    }
-
-    public void FreeAudio()
-    {
-        StopAudio();
-        if (m_soundPtr != IntPtr.Zero)
-        {
-            SDL_mixer.Mix_FreeChunk(m_soundPtr);  // Free the sound chunk
-            m_soundPtr = IntPtr.Zero;  // Reset the pointer to zero
         }
     }
 }
