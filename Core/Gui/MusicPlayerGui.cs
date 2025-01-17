@@ -5,6 +5,7 @@ using MusicPlayer.Core.Events;
 using MusicPlayer.Core.Gui.Bindings;
 using MusicPlayer.Core.Gui.Interfaces;
 using MusicPlayer.Core.Helper;
+using MusicPlayer.Core.Visuals;
 using SDL2;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Utils;
@@ -142,11 +143,64 @@ public class MusicPlayerGui : IGui
                 ImGui.EndChild();
                 ImGui.EndTabItem();
             }
+            if (ImGui.BeginTabItem("Settings"))
+            {
+                ImGui.BeginChild("##Settings", new Vector2(childWidth, childHeight), ImGuiChildFlags.Borders);
+                {
+                    BuildSettings();
+                }
+                ImGui.EndChild();
+                ImGui.EndTabItem();
+            }
             ImGui.EndTabBar();
         }
         
         
         
+    }
+
+    private void BuildSettings()
+    {
+        ImGui.SeparatorText("Line Synth");
+        if (ImGui.Checkbox("Show LineSynth", ref SynthSettings.ShowLineSynth))
+        {
+            
+        }
+
+        if (ImGui.InputFloat("Smoothing", ref SynthSettings.LineSynthSmoothness, 0.025f))
+        {
+            
+        }
+        
+        ImGui.SeparatorText("Rect Synth");
+        if (ImGui.Checkbox("Show RectSynth", ref SynthSettings.ShowRectSynth))
+        {
+            
+        }
+        ImGui.Separator();
+
+        if (ImGui.InputInt("RectMultiplier", ref SynthSettings.RectSynthSmoothness, 1))
+        {
+            
+        }
+
+        if (ImGui.InputFloat("Intensity", ref SynthSettings.RectBandIntensityModifier, 0.1f))
+        {
+            
+        }
+        ImGui.Separator();
+        if (ImGui.InputInt("RectWidthMod", ref SynthSettings.RectWidthModifier, 1))
+        {
+            
+        }
+        if (ImGui.InputInt("RectMaxHeightMod", ref SynthSettings.RectMaxHeightModifier, 1))
+        {
+            
+        }
+        if (ImGui.InputInt("RectSpacingMod", ref SynthSettings.RectSpacingModifier, 1))
+        {
+            
+        }
     }
 
     private void BuildYtDlpSearch()
