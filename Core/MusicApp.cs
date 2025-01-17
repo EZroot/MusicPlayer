@@ -108,7 +108,6 @@ public class MusicApp : IGame
     {
         m_audioSynth.Render(m_renderService.RenderPtr, minHue, maxHue, SynthSettings.RectSynthSmoothness);
         m_audioSynth.RenderLineSynth(m_renderService.RenderPtr, minHueA, maxHueA, SynthSettings.LineSynthSmoothness);
-        m_audioSynth.RenderLineSynthOpposite(m_renderService.RenderPtr, minHueA, maxHueA, SynthSettings.LineSynthSmoothness);
     }
 
     public void RenderGui()

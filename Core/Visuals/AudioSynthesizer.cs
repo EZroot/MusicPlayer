@@ -42,119 +42,11 @@ public class AudioSynthesizer
         m_maxAmplitude = 0f;
         m_previousHeights = new float[m_audioService.FrequencyBands.Count];
         m_smoothingFactor = smoothingFactor;
-        
+
         SynthSettings.LoadSettings();
     }
 
-    public void RenderLineSynth(nint renderer, float minHue = 0.7f, float maxHue = 0.85f, float lerpFactor = 0.1f)
-    {
-        if (!SynthSettings.ShowLineSynth)
-            return;
-
-        var frequencyBands = m_audioService.FrequencyBands;
-        int bandCount = frequencyBands.Count;
-        if (bandCount == 0) return;
-
-        var bandRectSize = (m_rectWidth + m_rectSpacing) * frequencyBands.Count;
-        var initialY = m_windowHeight / 2;
-        var initialX = m_windowWidth - m_dockWindowWidth / 2 - bandRectSize / 2;
-
-        List<(int, int)> points = new List<(int, int)>();
-
-        for (int i = 0; i < bandCount; i++)
-        {
-            string bandName = frequencyBands.Keys.ElementAt(i);
-            float currentAmplitude = m_audioService.GetAmplitudeByName(bandName);
-
-            if (!previousAmplitudes.TryGetValue(bandName, out float previousAmplitude))
-            {
-                previousAmplitudes[bandName] = currentAmplitude;
-                previousAmplitude = currentAmplitude;
-            }
-
-            float interpolatedAmplitude = previousAmplitude + (currentAmplitude - previousAmplitude) * lerpFactor;
-            int currentHeight = (int)((interpolatedAmplitude * m_bandIntensityMod / m_maxAmplitude) * m_maxRectHeight);
-            currentHeight = Math.Clamp(currentHeight, 0, m_maxRectHeight);
-
-            int currentX = initialX + i * (m_rectWidth + m_rectSpacing);
-            int currentY = initialY - currentHeight / 2;
-
-            points.Add((currentX + m_rectWidth / 2 - 2, currentY));
-
-            SDL.SDL_Rect dot = new SDL.SDL_Rect
-            {
-                x = currentX + m_rectWidth / 2 - 2,
-                y = currentY,
-                w = 1,
-                h = 1
-            };
-            // SDL.SDL_RenderFillRect(renderer, ref dot);
-
-            previousAmplitudes[bandName] = interpolatedAmplitude;
-        }
-
-        if (points.Count >= 4)
-        {
-            var firstSplinePoints = GenerateCatmullRomSplinePoints(points[0], points[0], points[1], points[2], 20);
-            for (int j = 0; j < firstSplinePoints.Count - 1; j++)
-            {
-                int height1 = Math.Abs(firstSplinePoints[j].Item2 - initialY);
-                int height2 = Math.Abs(firstSplinePoints[j + 1].Item2 - initialY);
-                int avgHeight = (height1 + height2) / 2;
-
-                float ratio = avgHeight / (float)m_maxRectHeight;
-                float hue = (minHue + (maxHue - minHue) * ratio) * 360;
-                var (red, green, blue) = ColorHelper.HsvToRgb(hue, 1f, 1.0f);
-
-                SDL.SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
-                SDL.SDL_RenderDrawLine(renderer, firstSplinePoints[j].Item1, firstSplinePoints[j].Item2,
-                    firstSplinePoints[j + 1].Item1, firstSplinePoints[j + 1].Item2);
-            }
-        }
-
-        for (int i = 1; i < points.Count - 2; i++)
-        {
-            var splinePoints =
-                GenerateCatmullRomSplinePoints(points[i - 1], points[i], points[i + 1], points[i + 2], 20);
-            for (int j = 0; j < splinePoints.Count - 1; j++)
-            {
-                int height1 = Math.Abs(splinePoints[j].Item2 - initialY);
-                int height2 = Math.Abs(splinePoints[j + 1].Item2 - initialY);
-                int avgHeight = (height1 + height2) / 2;
-
-                float ratio = avgHeight / (float)m_maxRectHeight;
-                float hue = (minHue + (maxHue - minHue) * ratio) * 360;
-                var (red, green, blue) = ColorHelper.HsvToRgb(hue, 1f, 1.0f);
-
-                SDL.SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
-                SDL.SDL_RenderDrawLine(renderer, splinePoints[j].Item1, splinePoints[j].Item2,
-                    splinePoints[j + 1].Item1,
-                    splinePoints[j + 1].Item2);
-            }
-        }
-
-        if (points.Count >= 4)
-        {
-            var lastSplinePoints = GenerateCatmullRomSplinePoints(points[points.Count - 3], points[points.Count - 2],
-                points[points.Count - 1], points[points.Count - 1], 20);
-            for (int j = 0; j < lastSplinePoints.Count - 1; j++)
-            {
-                int height1 = Math.Abs(lastSplinePoints[j].Item2 - initialY);
-                int height2 = Math.Abs(lastSplinePoints[j + 1].Item2 - initialY);
-                int avgHeight = (height1 + height2) / 2;
-
-                float ratio = avgHeight / (float)m_maxRectHeight;
-                float hue = (minHue + (maxHue - minHue) * ratio) * 360;
-                var (red, green, blue) = ColorHelper.HsvToRgb(hue, 1f, 1.0f);
-
-                SDL.SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
-                SDL.SDL_RenderDrawLine(renderer, lastSplinePoints[j].Item1, lastSplinePoints[j].Item2,
-                    lastSplinePoints[j + 1].Item1, lastSplinePoints[j + 1].Item2);
-            }
-        }
-    }
-
-    public void RenderLineSynthOpposite(nint renderer, float minHue = 0.7f, float maxHue = 0.85f,
+    public void RenderLineSynth(nint renderer, float minHue = 0.7f, float maxHue = 0.85f,
         float lerpFactor = 0.1f)
     {
         if (!SynthSettings.ShowLineSynth)
@@ -168,7 +60,8 @@ public class AudioSynthesizer
         var initialY = m_windowHeight / 2;
         var initialX = m_windowWidth - m_dockWindowWidth / 2 - bandRectSize / 2;
 
-        List<(int, int)> points = new List<(int, int)>();
+        List<(int, int)> pointsUpward = new List<(int, int)>();
+        List<(int, int)> pointsDownward = new List<(int, int)>();
 
         for (int i = 0; i < bandCount; i++)
         {
@@ -186,80 +79,53 @@ public class AudioSynthesizer
             currentHeight = Math.Clamp(currentHeight, 0, m_maxRectHeight);
 
             int currentX = initialX + i * (m_rectWidth + m_rectSpacing);
-            int currentY = initialY + currentHeight / 2; // Reverse direction for downward effect
+            int currentYUpward = initialY - currentHeight / 2;
+            int currentYDownward = initialY + currentHeight / 2;
 
-            points.Add((currentX + m_rectWidth / 2 - 2, currentY));
-
-            SDL.SDL_Rect dot = new SDL.SDL_Rect
-            {
-                x = currentX + m_rectWidth / 2 - 2,
-                y = currentY,
-                w = 1,
-                h = 1
-            };
-            // SDL.SDL_RenderFillRect(renderer, ref dot);
+            pointsUpward.Add((currentX + m_rectWidth / 2 - 2, currentYUpward));
+            pointsDownward.Add((currentX + m_rectWidth / 2 - 2, currentYDownward));
 
             previousAmplitudes[bandName] = interpolatedAmplitude;
         }
 
-        if (points.Count >= 4)
-        {
-            var firstSplinePoints = GenerateCatmullRomSplinePoints(points[0], points[0], points[1], points[2], 20);
-            for (int j = 0; j < firstSplinePoints.Count - 1; j++)
-            {
-                int height1 = Math.Abs(firstSplinePoints[j].Item2 - initialY);
-                int height2 = Math.Abs(firstSplinePoints[j + 1].Item2 - initialY);
-                int avgHeight = (height1 + height2) / 2;
+        RenderSpline(renderer, pointsUpward, initialY, minHue, maxHue);
+        RenderSpline(renderer, pointsDownward, initialY, minHue, maxHue);
+    }
 
-                float ratio = avgHeight / (float)m_maxRectHeight;
-                float hue = (minHue + (maxHue - minHue) * ratio) * 360;
-                var (red, green, blue) = ColorHelper.HsvToRgb(hue, 1f, 1.0f);
+    private void RenderSpline(nint renderer, List<(int, int)> points, int initialY, float minHue, float maxHue)
+    {
+        if (points.Count < 4) return;
 
-                SDL.SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
-                SDL.SDL_RenderDrawLine(renderer, firstSplinePoints[j].Item1, firstSplinePoints[j].Item2,
-                    firstSplinePoints[j + 1].Item1, firstSplinePoints[j + 1].Item2);
-            }
-        }
+        var firstSplinePoints = GenerateCatmullRomSplinePoints(points[0], points[0], points[1], points[2], 20);
+        DrawSpline(renderer, firstSplinePoints, initialY, minHue, maxHue);
 
         for (int i = 1; i < points.Count - 2; i++)
         {
             var splinePoints =
                 GenerateCatmullRomSplinePoints(points[i - 1], points[i], points[i + 1], points[i + 2], 20);
-            for (int j = 0; j < splinePoints.Count - 1; j++)
-            {
-                int height1 = Math.Abs(splinePoints[j].Item2 - initialY);
-                int height2 = Math.Abs(splinePoints[j + 1].Item2 - initialY);
-                int avgHeight = (height1 + height2) / 2;
-
-                float ratio = avgHeight / (float)m_maxRectHeight;
-                float hue = (minHue + (maxHue - minHue) * ratio) * 360;
-                var (red, green, blue) = ColorHelper.HsvToRgb(hue, 1f, 1.0f);
-
-                SDL.SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
-                SDL.SDL_RenderDrawLine(renderer, splinePoints[j].Item1, splinePoints[j].Item2,
-                    splinePoints[j + 1].Item1,
-                    splinePoints[j + 1].Item2);
-            }
+            DrawSpline(renderer, splinePoints, initialY, minHue, maxHue);
         }
 
-        if (points.Count >= 4)
+        var lastSplinePoints = GenerateCatmullRomSplinePoints(points[points.Count - 3], points[points.Count - 2],
+            points[points.Count - 1], points[points.Count - 1], 20);
+        DrawSpline(renderer, lastSplinePoints, initialY, minHue, maxHue);
+    }
+
+    private void DrawSpline(nint renderer, List<(int, int)> splinePoints, int initialY, float minHue, float maxHue)
+    {
+        for (int j = 0; j < splinePoints.Count - 1; j++)
         {
-            var lastSplinePoints = GenerateCatmullRomSplinePoints(points[points.Count - 3], points[points.Count - 2],
-                points[points.Count - 1], points[points.Count - 1], 20);
-            for (int j = 0; j < lastSplinePoints.Count - 1; j++)
-            {
-                int height1 = Math.Abs(lastSplinePoints[j].Item2 - initialY);
-                int height2 = Math.Abs(lastSplinePoints[j + 1].Item2 - initialY);
-                int avgHeight = (height1 + height2) / 2;
+            int height1 = Math.Abs(splinePoints[j].Item2 - initialY);
+            int height2 = Math.Abs(splinePoints[j + 1].Item2 - initialY);
+            int avgHeight = (height1 + height2) / 2;
 
-                float ratio = avgHeight / (float)m_maxRectHeight;
-                float hue = (minHue + (maxHue - minHue) * ratio) * 360;
-                var (red, green, blue) = ColorHelper.HsvToRgb(hue, 1f, 1.0f);
+            float ratio = avgHeight / (float)m_maxRectHeight;
+            float hue = (minHue + (maxHue - minHue) * ratio) * 360;
+            var (red, green, blue) = ColorHelper.HsvToRgb(hue, 1f, 1.0f);
 
-                SDL.SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
-                SDL.SDL_RenderDrawLine(renderer, lastSplinePoints[j].Item1, lastSplinePoints[j].Item2,
-                    lastSplinePoints[j + 1].Item1, lastSplinePoints[j + 1].Item2);
-            }
+            SDL.SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
+            SDL.SDL_RenderDrawLine(renderer, splinePoints[j].Item1, splinePoints[j].Item2,
+                splinePoints[j + 1].Item1, splinePoints[j + 1].Item2);
         }
     }
 
@@ -269,7 +135,9 @@ public class AudioSynthesizer
         var freqCount = frequencyBands.Count == 0 ? 1 : frequencyBands.Count;
         int totalVisibleBands = frequencyBands.Count + (frequencyBands.Count - 1) * extraBandsPerGap;
         int totalSpacing = (totalVisibleBands - 1) * m_rectSpacing;
-        m_rectWidth = SynthSettings.RectWidthModifier; //(int)((m_dockWindowWidth - totalSpacing) / totalVisibleBands) + SynthSettings.RectWidthModifier;
+        m_rectWidth =
+            SynthSettings
+                .RectWidthModifier; //(int)((m_dockWindowWidth - totalSpacing) / totalVisibleBands) + SynthSettings.RectWidthModifier;
         m_maxRectHeight = (int)(m_dockWindowHeight * 0.9f) + SynthSettings.RectMaxHeightModifier;
         var spacing = m_dockWindowWidth / totalVisibleBands;
         m_rectSpacing = spacing + SynthSettings.RectSpacingModifier; // * SynthSettings.RectSynthSmoothness;
