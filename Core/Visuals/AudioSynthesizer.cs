@@ -42,6 +42,8 @@ public class AudioSynthesizer
         m_maxAmplitude = 0f;
         m_previousHeights = new float[m_audioService.FrequencyBands.Count];
         m_smoothingFactor = smoothingFactor;
+        
+        SynthSettings.LoadSettings();
     }
 
     public void RenderLineSynth(nint renderer, float minHue = 0.7f, float maxHue = 0.85f, float lerpFactor = 0.1f)

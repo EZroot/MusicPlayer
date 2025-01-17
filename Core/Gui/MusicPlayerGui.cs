@@ -161,45 +161,47 @@ public class MusicPlayerGui : IGui
 
     private void BuildSettings()
     {
+        if (ImGui.Button("Load Settings"))
+        {
+            SynthSettings.LoadSettings();
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("Save Settings"))
+        {
+            SynthSettings.SaveSettings();
+        }
+        
         ImGui.SeparatorText("Line Synth");
         if (ImGui.Checkbox("Show LineSynth", ref SynthSettings.ShowLineSynth))
         {
-            
         }
 
         if (ImGui.InputFloat("Smoothing", ref SynthSettings.LineSynthSmoothness, 0.025f))
         {
-            
         }
         
         ImGui.SeparatorText("Rect Synth");
         if (ImGui.Checkbox("Show RectSynth", ref SynthSettings.ShowRectSynth))
         {
-            
         }
         ImGui.Separator();
 
         if (ImGui.InputInt("RectMultiplier", ref SynthSettings.RectSynthSmoothness, 1))
         {
-            
         }
 
         if (ImGui.InputFloat("Intensity", ref SynthSettings.RectBandIntensityModifier, 0.1f))
         {
-            
         }
         ImGui.Separator();
         if (ImGui.InputInt("RectWidthMod", ref SynthSettings.RectWidthModifier, 1))
         {
-            
         }
         if (ImGui.InputInt("RectMaxHeightMod", ref SynthSettings.RectMaxHeightModifier, 1))
         {
-            
         }
         if (ImGui.InputInt("RectSpacingMod", ref SynthSettings.RectSpacingModifier, 1))
         {
-            
         }
     }
 
