@@ -9,7 +9,7 @@ using SDL2Engine.Core;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.GuiRenderer;
 using SDL2Engine.Core.Partitions.Interfaces;
-using SDL2Engine.Core.Rendering.Interfaces;
+using SDL2Engine.Core.Cameras.Interfaces;
 using SDL2Engine.Core.Utils;
 using SDL2Engine.Core.Windowing.Interfaces;
 using SDL2Engine.Events;
