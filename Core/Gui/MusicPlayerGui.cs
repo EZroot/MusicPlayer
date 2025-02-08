@@ -6,6 +6,7 @@ using MusicPlayer.Core.Gui.Bindings;
 using MusicPlayer.Core.Gui.Interfaces;
 using MusicPlayer.Core.Helper;
 using MusicPlayer.Core.Visuals;
+using MusicPlayer.Core.YtDlp;
 using SDL2;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Utils;
@@ -207,6 +208,14 @@ public class MusicPlayerGui : IGui
 
     private void BuildYtDlpSearch()
     {
+        if (ImGui.Button("Check for Yt-Dlp update"))
+        {
+            var downloader = new Downloader();
+            Task.Run(async () =>
+            {
+                await downloader.DownloadAsync();
+            });
+        }
         if (ImGui.InputText("##Search:", ref m_ytdlpSearchBuffer, 1024))
         {
             
